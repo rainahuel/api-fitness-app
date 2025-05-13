@@ -29,22 +29,18 @@ app.use(helmet());
 app.use(morgan('dev'));
 app.use(express.json());
 
-// Basic route
 app.get('/', (req, res) => {
   res.json({ message: 'Welcome to Rain Fitness API' });
 });
 
-// Routes
 app.use('/api/users', userRoutes);
 app.use('/api/nutrition-goals', nutritionGoalRoutes);
 app.use('/api/meal-plans', mealPlanRoutes);
 app.use('/api/workout-plans', workoutPlanRoutes);
 
-// Error handling middlewares
 app.use(notFound);
 app.use(errorHandler);
 
-// Connect to MongoDB and start server
 if (process.env.NODE_ENV !== 'production') {
   connectDB().then(() => {
     app.listen(PORT, () => {
@@ -53,7 +49,6 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-// Conectar a MongoDB sin iniciar el servidor (para Vercel)
 connectDB();
 
 export default app;
