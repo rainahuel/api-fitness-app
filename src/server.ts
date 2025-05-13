@@ -45,10 +45,15 @@ app.use(notFound);
 app.use(errorHandler);
 
 // Connect to MongoDB and start server
-connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+if (process.env.NODE_ENV !== 'production') {
+  connectDB().then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+    });
   });
-});
+}
+
+// Conectar a MongoDB sin iniciar el servidor (para Vercel)
+connectDB();
 
 export default app;
