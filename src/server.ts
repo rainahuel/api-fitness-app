@@ -9,6 +9,8 @@ import userRoutes from './routes/userRoutes';
 import nutritionGoalRoutes from './routes/nutritionGoalRoutes';
 import mealPlanRoutes from './routes/mealPlanRoutes';
 import workoutPlanRoutes from './routes/workoutPlanRoutes';
+import passwordResetRoutes from './routes/passwordResetRoutes';
+
 
 // Load environment variables
 dotenv.config();
@@ -32,7 +34,7 @@ app.use(express.json());
 app.get('/', (req, res) => {
   res.json({ message: 'Welcome to Rain Fitness API' });
 });
-
+app.use('/api/password', passwordResetRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/nutrition-goals', nutritionGoalRoutes);
 app.use('/api/meal-plans', mealPlanRoutes);

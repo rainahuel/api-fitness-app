@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node dist/server.js",
-    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "dev": "NODE_ENV=development ts-node-dev --respawn --clear --transpile-only src/server.ts",
     "build": "tsc"
   },
   "engines": {
@@ -22,7 +22,8 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.14.2",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "resend": "^4.5.1"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
