@@ -41,14 +41,13 @@ app.use('/api/workout-plans', workoutPlanRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
+connectDB();
+
+// Para entornos tradicionales, inicia el servidor
 if (process.env.NODE_ENV !== 'production') {
-  connectDB().then(() => {
-    app.listen(PORT, () => {
-      console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-    });
+  app.listen(PORT, () => {
+    console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
   });
 }
-
-connectDB();
 
 export default app;
