@@ -1,12 +1,71 @@
 import mongoose from 'mongoose';
 
-const connectDB = async (): Promise<void> => {
+// Interfaz para el objeto de caché
+interface MongooseCache {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
+}
+
+// Variable para cachear la conexión
+// En entornos serverless, esta se inicializa en cada invocación en frío,
+// pero se reutiliza entre invocaciones posteriores mientras la instancia esté activa
+let cached: MongooseCache = global.mongoose;
+
+// Inicializar el caché si no existe
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
+
+const connectDB = async (): Promise<typeof mongoose> => {
+  // Si ya hay una conexión activa, reutilízala
+  if (cached.conn) {
+    return cached.conn;
+  }
+
+  // Si ya hay una promesa de conexión en curso, espera a que se resuelva
+  if (!cached.promise) {
+    const opts = {
+      bufferCommands: false, // Desactiva comandos en buffer para fallar rápido si hay problemas
+      serverSelectionTimeoutMS: 10000, // Timeout para selección de servidor
+      socketTimeoutMS: 45000, // Timeout para operaciones de socket
+      // Otras opciones de conexión útiles:
+      maxPoolSize: 10, // Limita el número de conexiones en el pool
+      minPoolSize: 1, // Mantiene al menos una conexión abierta
+      connectTimeoutMS: 10000, // Timeout para la conexión inicial
+    };
+
+    // Crear una nueva promesa de conexión
+    cached.promise = mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/rain-fitness', opts)
+      .then((mongoose) => {
+        console.log(`MongoDB Connected: ${mongoose.connection.host}`);
+        return mongoose;
+      })
+      .catch((err) => {
+        console.error('MongoDB connection error:', err);
+        cached.promise = null; // Resetear la promesa en caso de error
+        throw err;
+      });
+  }
+
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/rain-fitness');
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
-  } catch (error) {
-    console.error(`Error: ${error.message}`);
-    process.exit(1);
+    // Esperar a que la promesa se resuelva y guardar la conexión
+    cached.conn = await cached.promise;
+    return cached.conn;
+  } catch (err) {
+    // Manejar errores
+    console.error('Failed to connect to MongoDB:', err);
+    throw err;
+  }
+};
+
+// Función para manejar el cierre de la conexión
+// Útil para scripts y pruebas, no necesario en serverless
+export const disconnectDB = async (): Promise<void> => {
+  if (cached.conn) {
+    await cached.conn.connection.close();
+    cached.conn = null;
+    cached.promise = null;
+    console.log('MongoDB Disconnected');
   }
 };
 
