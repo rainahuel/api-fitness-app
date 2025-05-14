@@ -25,13 +25,15 @@ const connectDB = async (): Promise<typeof mongoose> => {
   // Si ya hay una promesa de conexión en curso, espera a que se resuelva
   if (!cached.promise) {
     const opts = {
-      bufferCommands: false, // Desactiva comandos en buffer para fallar rápido si hay problemas
-      serverSelectionTimeoutMS: 10000, // Timeout para selección de servidor
-      socketTimeoutMS: 45000, // Timeout para operaciones de socket
-      // Otras opciones de conexión útiles:
-      maxPoolSize: 10, // Limita el número de conexiones en el pool
-      minPoolSize: 1, // Mantiene al menos una conexión abierta
-      connectTimeoutMS: 10000, // Timeout para la conexión inicial
+      bufferCommands: false,
+      serverSelectionTimeoutMS: 30000, // Aumentado a 30 segundos
+      socketTimeoutMS: 75000, // Aumentado a 75 segundos
+      connectTimeoutMS: 30000, // Aumentado a 30 segundos
+      maxPoolSize: 10,
+      minPoolSize: 1,
+      // Añadir para mayor estabilidad
+      heartbeatFrequencyMS: 10000, // Verificar conexión cada 10 segundos
+      autoIndex: false, // Desactivar indexación automática en producción
     };
 
     // Crear una nueva promesa de conexión

@@ -28,4 +28,6 @@ const PasswordResetTokenSchema: Schema = new Schema({
   }
 });
 
-export default mongoose.model<IPasswordResetToken>('PasswordResetToken', PasswordResetTokenSchema);
+// Al final del archivo
+export default mongoose.models.PasswordResetToken || 
+  mongoose.model<IPasswordResetToken>('PasswordResetToken', PasswordResetTokenSchema);
