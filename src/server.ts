@@ -17,7 +17,7 @@ dotenv.config();
 
 // Initialize Express app
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 // Middleware
 app.use(cors({
@@ -45,11 +45,9 @@ app.use(errorHandler);
 
 connectDB();
 
-// Para entornos tradicionales, inicia el servidor
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, () => {
-    console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-  });
-}
+// Escuchar en todos los entornos
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+});
 
 export default app;

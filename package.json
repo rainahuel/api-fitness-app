@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node dist/server.js",
     "dev": "NODE_ENV=development ts-node-dev --respawn --clear --transpile-only src/server.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "deploy": "fly deploy"
   },
   "engines": {
     "node": ">=16.x"
