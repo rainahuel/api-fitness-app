@@ -1,19 +1,27 @@
+// src/config/db.ts (solución completa)
 import mongoose from 'mongoose';
 
-// Interfaz para el objeto de caché
+// Definir el tipo para la caché global de mongoose
 interface MongooseCache {
   conn: typeof mongoose | null;
   promise: Promise<typeof mongoose> | null;
 }
 
-// Variable para cachear la conexión
-// En entornos serverless, esta se inicializa en cada invocación en frío,
-// pero se reutiliza entre invocaciones posteriores mientras la instancia esté activa
-let cached: MongooseCache = global.mongoose;
+// Añadir la declaración global para typescript
+declare global {
+  // eslint-disable-next-line no-var
+  var mongoose: MongooseCache | undefined;
+}
 
-// Inicializar el caché si no existe
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
+// Variable para cachear la conexión
+let cached: MongooseCache = global.mongoose || {
+  conn: null,
+  promise: null
+};
+
+// Guardar la caché en global
+if (!global.mongoose) {
+  global.mongoose = cached;
 }
 
 const connectDB = async (): Promise<typeof mongoose> => {
