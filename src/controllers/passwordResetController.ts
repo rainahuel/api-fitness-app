@@ -74,6 +74,7 @@ export const requestPasswordReset = async (req: Request, res: Response): Promise
  */
 export const resetPassword = async (req: Request, res: Response): Promise<void> => {
     try {
+      console.log('Reset password request received');
       const { token, newPassword } = req.body;
   
       if (!token || !newPassword) {
@@ -81,33 +82,19 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
         return;
       }
   
-      // Validar la complejidad de la contraseña
-      if (newPassword.length < 8) {
-        res.status(400).json({ message: 'Password must be at least 8 characters long' });
-        return;
-      }
-  
-      // Si el token es un código de verificación (8 caracteres), buscar tokens que comiencen con ese código
-      // De lo contrario, buscar el token exacto
+      // Validación y procesamiento del token
       const isVerificationCode = token.length <= 8;
-      
       let resetToken;
       
       if (isVerificationCode) {
-        // Convertir a mayúsculas para hacer la comparación insensible a mayúsculas/minúsculas
         const upperCaseCode = token.toUpperCase();
-        
-        // Buscar todos los tokens válidos
         const validTokens = await PasswordResetToken.find({
           expiresAt: { $gt: new Date() }
         });
-        
-        // Encontrar un token que comience con el código de verificación
         resetToken = validTokens.find(tokenDoc => 
           tokenDoc.token.substring(0, 8).toUpperCase() === upperCaseCode
         );
       } else {
-        // Buscar el token exacto (para compatibilidad con el método anterior)
         resetToken = await PasswordResetToken.findOne({
           token,
           expiresAt: { $gt: new Date() }
@@ -121,20 +108,21 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
   
       // Buscar el usuario
       const user = await User.findById(resetToken.userId);
-  
       if (!user) {
         res.status(404).json({ message: 'User not found' });
         return;
       }
   
-      // Hashear la nueva contraseña
-      const saltRounds = 10;
-      const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
-  
-      // Actualizar la contraseña del usuario
-      user.password = hashedPassword;
-      await user.save();
-  
+      // Hashear la contraseña manualmente
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+      
+      // SOLUCIÓN: Usar updateOne para evitar el middleware pre-save
+      await User.updateOne(
+        { _id: user._id },
+        { $set: { password: hashedPassword } }
+      );
+      
       // Eliminar el token usado
       await PasswordResetToken.deleteOne({ _id: resetToken._id });
   
