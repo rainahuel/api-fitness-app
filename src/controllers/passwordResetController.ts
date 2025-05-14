@@ -76,6 +76,11 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
     try {
       console.log('Reset password request received');
       const { token, newPassword } = req.body;
+
+      if (newPassword.length < 8) { 
+        res.status(400).json({ message: 'Password must be at least 8 characters long' });
+        return;
+      }
   
       if (!token || !newPassword) {
         res.status(400).json({ message: 'Verification code and new password are required' });
