@@ -162,14 +162,17 @@ export const updateUserProfile = async (req: Request, res: Response): Promise<vo
 // @access  Private
 export const deleteUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const user = await User.findById(req.user?._id);
+    // @ts-ignore - user is added by auth middleware
+    const user = await User.findById(req.user._id);
 
     if (user) {
-      await User.findByIdAndDelete(req.user?._id);
+      // @ts-ignore - user is added by auth middleware
+      await User.findByIdAndDelete(req.user._id);
       
       res.json({
         message: 'User account deleted successfully',
-        deletedUserId: req.user?._id
+        // @ts-ignore - user is added by auth middleware
+        deletedUserId: req.user._id
       });
     } else {
       res.status(404).json({ message: 'User not found' });
