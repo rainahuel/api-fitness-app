@@ -155,3 +155,64 @@ export const updateUserProfile = async (req: Request, res: Response): Promise<vo
     });
   }
 };
+
+
+// @desc    Delete user account
+// @route   DELETE /api/users/profile
+// @access  Private
+export const deleteUser = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const user = await User.findById(req.user?._id);
+
+    if (user) {
+      await User.findByIdAndDelete(req.user?._id);
+      
+      res.json({
+        message: 'User account deleted successfully',
+        deletedUserId: req.user?._id
+      });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error: any) {
+    console.error('Delete user error:', error);
+    res.status(500).json({
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Delete user by ID (Admin only - opcional)
+// @route   DELETE /api/users/:id
+// @access  Private/Admin
+export const deleteUserById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      res.status(400).json({ message: 'User ID is required' });
+      return;
+    }
+
+    const user = await User.findById(id);
+
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    await User.findByIdAndDelete(id);
+
+    res.json({
+      message: 'User deleted successfully',
+      deletedUserId: id
+    });
+  } catch (error: any) {
+    console.error('Delete user by ID error:', error);
+    res.status(500).json({
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};

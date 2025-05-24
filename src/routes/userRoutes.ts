@@ -3,7 +3,9 @@ import {
   registerUser, 
   loginUser, 
   getUserProfile, 
-  updateUserProfile 
+  updateUserProfile,
+  deleteUserById,
+  deleteUser
 } from '../controllers/userController';
 import { protect } from '../middleware/authMiddleware';
 
@@ -16,6 +18,9 @@ router.post('/login', loginUser);
 // Protected routes
 router.route('/profile')
   .get(protect, getUserProfile)
-  .put(protect, updateUserProfile);
+  .put(protect, updateUserProfile)
+  .delete(protect, deleteUser); 
+
+router.delete('/:id', protect, deleteUserById);  
 
 export default router;
